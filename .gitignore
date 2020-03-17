@@ -2,3 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+*.rds
+tables/*.txt
+tables/*.md
+plots/*
+packrat/lib*/
+packrat/src/

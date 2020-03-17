@@ -1,0 +1,45 @@
+```{r setup, include=FALSE, echo = FALSE}
+options(digits = 2)
+source(".Rprofile")
+knitr::opts_chunk$set( comment = "", warning = FALSE, message = FALSE, echo = FALSE)
+
+flow <- readRDS("cache/flow_cc_tr.rds")[ cc == "case" & crit == "matched" & crit_value == TRUE ]
+flow[ , target_range := gsub(" ", "", target_range)]
+
+qoac_diff <- readRDS("cache/matched_analyses.rds") %>%
+	filter(key %in% c("in_range", "log_vgr"), subgroup == "all") %>%
+	arrange(target_range, key, desc(period_id)) %>%
+	select(target_range, period_id, key, estimate, ci1 = conf.low, ci2 = conf.high)
+setDT(qoac_diff)
+
+qoac_diff[ estimate > 0, c("dir", "conf.low", "conf.high") := .("higher", ci1, ci2)]
+qoac_diff[ estimate < 0, c("dir", "estimate", "conf.low", "conf.high") := .("lower", abs(estimate), abs(ci2), abs(ci1))]
+
+qoac_diff[ key == "in_range", c("estimate", "conf.low", "conf.high") := .(estimate * 100, conf.low * 100, conf.high * 100)]
+qoac_diff[ key == "in_range", D := est_ci(.SD, 0, CI_text = "95% CI ")]
+qoac_diff[ key == "log_vgr",  D := est_ci(.SD, 2, CI_text = "95% CI ")]
+qoac_diff[ , target_range := gsub(" ", "", target_range)]
+```
+
+# Abstract
+
+**Aims**
+We assessed whether switching from short-acting acenocoumarol to long-acting phenprocoumon could improve measures of VKA control: the time in the therapeutic range (TTR) and INR variability.
+
+**Methods and Results**
+In a retrospective cohort with data on `r with(as.data.table(readRDS("cache/summary_followup.rds")), format(round(sum(futot)), big.mark = ","))` patients-years of VKA management from two first-line anticoagulation clinics in the Netherlands, we identified `r flow[[1, "Npat"]]` patients in target range `r flow[[1, "target_range"]]`, `r flow[[2, "Npat"]]` patients in target range `r flow[[2, "target_range"]]` and `r flow[[3, "Npat"]]` patients in target range `r flow[[3, "target_range"]]`  who switched from acenocoumarol to phenprocoumon.
+They were matched in a 1:2 ratio to non-switching controls using propensity score matching.
+
+Over the first 180 days after a switch,
+switchers' TTR declined `r And(qoac_diff[key == "in_range" & period_id == "short-term", D])` percentage points relative to non-switchers, in target ranges `r And(qoac_diff[key == "in_range" & period_id == "short-term", target_range])`.
+Anticoagulation was more often supra-therapeutic in switchers,
+and switchers had a higher INR variability.
+
+In the following 180 days, TTR in switchers became `r And(qoac_diff[key == "in_range" & period_id == "long-term", D])` percentage points better than in non-switchers.
+Switchers' INRs were much more stable than non-switchers'.
+
+**Conclusion**
+Eventually, a switch from acenocoumarol to phenprocoumon leads to a higher TTR and a lower INR variability.
+However, this is preceded by a transition period with opposite effects.
+An improved conversion algorithm could possibly shorten the transition period.
+Until then, physicians and patients should decide whether switching is worth the increased risk during the transition phase.
