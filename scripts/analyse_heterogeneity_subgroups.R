@@ -15,10 +15,11 @@ matched_data[ , Subgroup := factor(subgroup, levels = levels(subgroup), labels =
 # to see whether they have the same results.
 
 #---- Create plots for visual inspection ----
-plot_subgroup <- function(Data, key) {
+plot_subgroup <- function(Data, key, target_range) {
 	Data <- Data %>%
-		filter(key == !! key)
-	all_data <- filter(Data, subgroup == "all")
+		filter(key == !! key, target_range == !! target_range)
+	all_data <- filter(Data, subgroup == "all", target_range == !! target_range)
+	n_subgroup <- length(unique(Data$Subgroup))
 	
 	Plot <- ggplot(Data, aes(x = estimate, xmin = conf.low, xmax = conf.high, y = Subgroup, colour = factor(subgroup, rev(levels(subgroup))))) +
 		# Show vertical line at x = 0
@@ -27,27 +28,26 @@ plot_subgroup <- function(Data, key) {
 		geom_point() +
 		geom_errorbarh(height = 0.25) +
 		# Indicate area of "all"
-		geom_rect(ymin = 0 - 2.5, ymax = length(subgroup_names) + 0.5 + 2.5,
+		geom_rect(ymin = 0 - 2.5, ymax = n_subgroup + 0.5 + 2.5,
 				  fill = "grey", colour = "transparent", alpha = 0.2,
 				  data = all_data) +
 		geom_vline(aes(xintercept = estimate), linetype = "dashed", colour = "#333333",
 				   data = all_data) +
 		# Label favourable direction
-		geom_text(x = 0, label = ifelse(key == "log_vgr", "Switch better ", "Switch worse "), y = length(subgroup_names) + 0.5,
+		geom_text(x = 0, label = ifelse(key == "log_vgr", "Switch better ", "Switch worse "), y = n_subgroup + 0.5,
 				  hjust = "right", vjust = "top", size = 2.5, colour = "black",
 				  data = all_data) +
-		geom_text(x = 0, label = ifelse(key == "log_vgr", " Switch worse", " Switch better"), y = length(subgroup_names) + 0.5,
+		geom_text(x = 0, label = ifelse(key == "log_vgr", " Switch worse", " Switch better"), y = n_subgroup + 0.5,
 				  hjust = "left", vjust = "top", size = 2.5, colour = "black",
 				  data = all_data) +
 		# Other options
-		facet_grid(vars(period_id), vars(target_range)) +
+		facet_grid(vars(period_id), vars(Key)) +
 		ggthemes::theme_few() +
-		theme(legend.position = "none", title = element_text(size = 10)) +
+		theme(legend.position = "none", title = element_text(size = 10), strip.text.x = element_text(hjust = 0)) +
 		plot_colours() +
 		labs(
-			x = "Difference from matched non-switchers, estimate (95% CI)",
-			y = "",
-			title = paste(ifelse(key == "log_vgr", "INR variability", "TTR"), "in subgroups, compared with matched non-switching controls")
+			x = "Difference with matched controls, estimate (95% CI)",
+			y = ""
 		) +
 		lims(x = c(
 			min(Data$conf.low) - 0.1 * abs(min(Data$conf.low)),
@@ -55,58 +55,31 @@ plot_subgroup <- function(Data, key) {
 		))
 	
 	if(key == "log_vgr") {
-		Plot
+		Plot +
+			theme(
+				axis.text.y = element_blank(),
+				axis.ticks.y = element_blank()
+			)
 	} else {
-		Plot + scale_x_continuous(labels = scales::percent)
+		Plot +
+			scale_x_continuous(labels = scales::percent) +
+			theme(
+				strip.text.y = element_blank()
+			)
 	}
 }
 
-plots <- ggpubr::ggarrange(
-	plot_subgroup(matched_data, "in_range"),
-	plot_subgroup(matched_data, "log_vgr"),
-	nrow = 2, ncol = 1
-)
-ggsave("plots/subgroup_forest.png", plots, width = 10, height = 8.5)
-ggsave("plots/subgroup_forest.eps", plots, width = 10, height = 8.5, device = cairo_ps)
+library(patchwork)
+plots <- map(unique(matched_data$target_range), function(target_range) {
+	wrap_elements(grid::textGrob(x = 0, hjust = 0, gp = grid::gpar(cex = 1.2),
+								 label = paste("Effect of a switch to phenprocoumon in subgroups, target range", target_range))) /
+		(plot_subgroup(matched_data, "in_range", target_range) +
+		 	plot_subgroup(matched_data, "log_vgr", target_range)) +
+		plot_layout(height = unit(c(0.8, 1), c("cm", "null")))
+})  
+names(plots) <- gsub(" ", "", unique(matched_data$target_range))
 
-#---- Quantify heterogeneity ----
-ma_data <- matched_data %>%
-	rename(var = key) %>%
-	select(target_range, subgroup, period_id, N, var, estimate, std.error) %>%
-	filter( var %in% c("in_range", "log_vgr", "above_range", "below_range")) %>%
-	arrange(target_range, desc(period_id), var)
-setDT(ma_data)
-
-ma_data[ subgroup %in% c("poor_ttr", "low_dose"), sg_type := "prompt"]
-ma_data[ subgroup %in% c("valve", "elderly"),     sg_type := "clinical"]
-
-do_meta <- function(Data, By) {
-	Dat <- copy(Data)
-	
-	BY <- str_to_upper(By)
-	walk(By, ~set(Dat, NULL, str_to_upper(.x), Dat[ , ...x]))
-	
-	x <- Dat[ ,
-			  .(mobj = .(metafor::rma(yi = estimate, sei = std.error,
-			  						weights = N, slab = paste(target_range, subgroup, period_id, var),
-			  						data = .SD))),
-			  by = BY]
-	x[ , I2  := map_dbl(mobj, "I2")]
-	x[ , QEp := map_dbl(mobj, "QEp")]
-	x[ , est := map_dbl(mobj, "b", 1)]
-	x[ , conf.low  := map_dbl(mobj, "ci.lb")]
-	x[ , conf.high := map_dbl(mobj, "ci.ub")]
-	colnames(x)[seq_len(length(By))] <- By
-	copy(x)
-}
-
-meta_prompt <- do_meta( ma_data[sg_type == "prompt" & subgroup != "all"],
-						c("target_range", "period_id", "var"))
-meta_clinic <- do_meta( ma_data[sg_type == "clinical" | subgroup == "all"],
-						c("target_range", "period_id", "var"))
-
-list(
-	prompt = meta_prompt,
-	clinic = meta_clinic
-) %>%
-	saveRDS("cache/matched_heterogeneity.rds")
+iwalk(plots, function(x, tr) {
+	ggsave(paste0("plots/subgroup_forest-", tr, ".png"), x, width = 5.2, height = 3, scale = 2)
+	ggsave(paste0("plots/subgroup_forest-", tr, ".eps"), x, width = 5.2, height = 3, device = cairo_ps, scale = 2)
+})

@@ -8,6 +8,6 @@ author:
 - Karina Meijer
 output: word_document
 bibliography: manuscript/bibliography.bib
-csl: manuscript/vancouver.csl
+csl: manuscript/plos-one.csl
 reference-section-title: References
 ---

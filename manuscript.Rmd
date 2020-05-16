@@ -22,22 +22,28 @@ We aimed to determine whether switching from acenocoumarol to phenprocoumon incr
 
 # Methods
 
-## Study aim and design
+This is a retrospective cohort study with patients from two first-line thrombosis services in the Netherlands.
+Of patients who switched to phenprocoumon, we compared TTR and INR variability before and after the switch.
+We also assessed whether this change differed from that in matched non-switchers, to account for the natural evolution of TTR and INR variability over time.
+We hypothesised that the switch to phenprocoumon would increase TTR and decrease INR variability.
 
-In the Netherlands, VKA management is delegated to dedicated first-line regional "Thrombosis Services", that organise INR checks and adjust the VKA dose.
+## Data sources and patient selection
+
+In the Netherlands, VKA management is delegated to dedicated first-line regional "Thrombosis Services" that organise INR checks and adjust the VKA dose.
 Each thrombosis service uses one preferred VKA.
 Certe Trombosedienst and Trombosedienst Maastricht UMC+ are two thrombosis services, in the north and south of the Netherlands, respectively, that routinely use acenocoumarol.
 Thrombosis Service physicians can suggest switching a patient to phenprocoumon;
 the treating physicians usually follow this suggestion.
 
-We analysed the prospective registration of INRs and dosing proposals to determine the effect of a switch from acenocoumarol to phenprocoumon on quality of anticoagulation parameters. We hypothesised that this switch would increase TTR and decrease INR variability.
-We compared switchers to non-switchers to account for the natural evolution of TTR and INR variability over time.
-
-## Data and patient selection
-
-We extracted INR records of adult patients who used acenocoumarol or switched from acenocoumarol to phenprocoumon, in target ranges 2–3, 2.5–3.5 or 2–3.5 (used for low-intensity anticoagulation before switching to the internationally recommended target range of 2–3 on January 1st, 2016), indicated for atrial fibrillation (AF), venous thromboembolism (VTE) or mechanical heart valve replacement (MVR).
+We extracted INR and VKA dosing records of adult patients
+who used acenocoumarol or switched from acenocoumarol to phenprocoumon,
+in target ranges 2–3, 2.5–3.5 or 2–3.5 (used for low-intensity anticoagulation before switching to the internationally recommended target range of 2–3 on January 1st, 2016),
+indicated for atrial fibrillation (AF), venous thromboembolism (VTE) or mechanical heart valve replacement (MVR).
 Data were extracted on July 17th, 2018 (Certe Trombosedienst) and June 20th, 2019 (Trombosedienst Maastricht UMC+).
 We excluded the first 90 days of treatment with vitamin K antagonists because INRs are unstable in the initiation period.
+
+All data were anonymised before they were provided to the researchers.
+The Medical Ethics Review Board of the University of Groningen confirmed that this study required no ethical approval.
 
 ### Switchers
 We selected patients who used acenocoumarol for at least 180 days (excluding the initial 90 days) before switching to phenprocoumon, and had follow-up INR measurements for at least a further 180 days.
@@ -69,13 +75,13 @@ $$
 \text{VGR} = \sqrt{ \frac{1}{n-1} \sum_{i = 2}^{n} \frac{ ( \text{INR}_{i} - \text{INR}_{i-1} )^2 }{\Delta t_{\text{(days)}}}  }
 $$
 
-We distinguished three periods: the 180 days before a patient's switch to phenprocoumon, the 180 days after switch, and a period from 180 to 360 days (see Figure 1).
+We distinguished three periods: the 180 days before a patient's switch to phenprocoumon, the 180 days after switch, and a period from 180 to 360 days (see Fig 1).
 For non-switchers, we used the switch date from the corresponding switcher.
 All differences were calculated with the 180 days before the switch (baseline) as reference.
 Because the distribution of the INR variability is skewed, the difference of the log-transformed INR variability was used (which is equivalent to the log-transformed ratio of INR variabilities).
 The VKA dose is reported as the mean dose during a certain period, and as a percentage of a patient's mean dose during the 180 days before the switch.
 
-**_Figure 1. Periods distinguished in the analyses._**
+**_Fig 1. Periods distinguished in the analyses._**
 *Solid lines indicate the time period used in the analyses.*
 *A period in which acenocoumarol was used, is shown in black; phenprocoumon is shown in red.*
 
@@ -118,15 +124,15 @@ fu_summ[ , fINR := format(fINR, "%B %d, %Y,")]
 mqoac_summ <- readRDS("cache/summary_matched_qoac.rds")[period_id == "acenocoumarol"]
 ```
 ## Patient selection
-Patient selection is outlined in Figure 2.  
+Patient selection is outlined in Fig 2.  
 The thrombosis service Groningen contributed `r fu_summ[center == "Groningen", "npat"]` eligible patients from `r fu_summ[center == "Groningen", "fINR"]` onwards, with a total follow-up of `r fu_summ[center == "Groningen", futot]` patient-years.
 The thrombosis service Maastricht contributed `r fu_summ[center == "Maastricht", "npat"]` patients from `r fu_summ[center == "Maastricht", "fINR"]` onwards, with `r fu_summ[center == "Maastricht", futot]` patient-years of follow-up.
 
-There are relatively more switchers in Maastricht than in Groningen.
+There were relatively more switchers in Maastricht than in Groningen.
 Although Maastricht contributed only `r fu_summ[center == "Maastricht", pctpat]`% of patients, they contributed `r fu_summ[center == "Maastricht", pctswitch]`% of switchers (`r fu_summ[center == "Maastricht", nswitch]`, versus `r fu_summ[center == "Groningen", nswitch]` in Groningen).
 `r english::Words(sum(mqoac_summ[cc == "case"]$n))` switchers could be matched to `r sum(mqoac_summ[cc == "control"]$n)` controls.
 
-**_Figure 2. Flowchart of patient selection in this study._**
+**_Fig 2. Flowchart of patient selection in this study._**
 
 ## Patient characteristics
 
@@ -168,16 +174,28 @@ Monitoring intervals were prolonged across all target ranges (Table 2).
 For target range 2-3, the monitoring interval was no longer related to the monitoring interval at baseline (&rho; `r switch_cor[key == "tbi" & period_id == "long-term" & target_range == "2 - 3", Rho]`).
 
 ## Effect of switching
-The evolution of VKA quality parameters after switching from acenocoumarol to phenprocoumon is summarised in Table 2.
+The evolution of VKA quality parameters after switching from acenocoumarol to phenprocoumon is summarised in Tables 2A-2C.
 Patients in target range 2-3 showed a marked immediate improvement in TTR.
 This was not true for patients in the other target ranges, where the improvements were only seen in the long-term period (180 to 360 days after the switch).
 In these target ranges, the time above the target range increased at the expense of not only the time below the range, but also the time in the therapeutic range.
 INR variability decreased across all target ranges.
 
-```{r child = "tables/switchers_qoac.md"}
+```{r child = "tables/switchers_qoac-2-3.md"}
 ```
 
-Table 2. VKA quality parameters in patients who switched from acenocoumarol to phenprocoumon.  
+**Table 2A. VKA quality parameters in patients in target range 2.0-3.0 who switched from acenocoumarol to phenprocoumon.**  
+P-values from Wilcoxon rank-sum test.
+
+```{r child = "tables/switchers_qoac-2-3.5.md"}
+```
+
+**Table 2B. VKA quality parameters in patients in target range 2.0-3.5 who switched from acenocoumarol to phenprocoumon.**  
+P-values from Wilcoxon rank-sum test.
+
+```{r child = "tables/switchers_qoac-2.5-3.5.md"}
+```
+
+**Table 2C. VKA quality parameters in patients in target range 2.5-3.5 who switched from acenocoumarol to phenprocoumon.**  
 P-values from Wilcoxon rank-sum test.
 
 The TTR achieved after the switch was only weakly related to the TTR before the switch:
@@ -216,7 +234,7 @@ ard[ , est_ci    := JasperTools::est_ci(.SD, digits = 0, CI_text = "95% CI ")]
 ```
 `r english::Words(flow_cc[cc == "case" & crit == "matched" & crit_value == TRUE, "Npat"][[1]])` switchers could be matched with `r flow_cc[cc == "control" & crit == "matched" & crit_value == TRUE, "Npat"]` non-switching controls, with a high similarity between the two groups (standardised mean difference in propensity scores was `r distances[target_range == "2-3" & subgroup == "all", dist]` for target range 2-3; `r distances[target_range == "2-3.5" & subgroup == "all", dist]` for target range 2-3.5 and `r distances[target_range == "2.5-3.5" & subgroup == "all", dist]` for target range 2.5-3.5).
 The coefficients from the propensity score matching and the patient characteristics from matched patients are shown in Tables S3 and S4, respectively.
-The difference in outcomes between switchers and matched non-switchers is shown in Table 3 and Figure 3.
+The difference in outcomes between switchers and matched non-switchers is shown in Tables 3A-3C and Figs 3-5.
 
 When comparing switchers with non-switchers,
 the initial effect of switching is negative:
@@ -239,15 +257,33 @@ The effect was more pronounced in target range 2.5-3.5, where patients were `r a
 Switchers in target ranges 2-3 and 2.5-3.5 were no longer monitored more often than their matched non-switching controls (they had `r tbi[period_id == "long-term" & target_range == "2 - 3", higher]` and `r tbi[period_id == "long-term" & target_range == "2 - 3", higher]` more time between measurements). 
 Patients in target range 2-3.5 had `r tbi[period_id == "long-term" & target_range == "2 - 3.5", higher]` more time between INR measurements.
 
-```{r child="tables/matched_overall.md"}
+```{r child="tables/matched-2-3.md"}
 ```
 
-Table 3. Difference in changes since baseline of switchers versus matched non-switching controls, with 95% confidence interval.  
+**Table 3A. Difference in changes since baseline of switchers versus matched non-switching controls in target range 2.0-3.0, with 95% confidence interval.**  
 An asterisk indicates that values were log-transformed in the analyses.  
 P-values from a linear mixed model.
 
+```{r child="tables/matched-2-3.5.md"}
+```
 
-**_Figure 3. Proportion of time spent in, above or below the target range in switchers and matched non-switchers, alongside INR variability in the same groups._**    
+**Table 3B. Difference in changes since baseline of switchers versus matched non-switching controls in target range 2.0-3.5, with 95% confidence interval.**  
+An asterisk indicates that values were log-transformed in the analyses.  
+P-values from a linear mixed model.
+```{r child="tables/matched-2.5-3.5.md"}
+```
+
+**Table 3C. Difference in changes since baseline of switchers versus matched non-switching controls in target range 2.5-3.5, with 95% confidence interval.**  
+An asterisk indicates that values were log-transformed in the analyses.  
+P-values from a linear mixed model.
+
+**_Fig 3. Proportion of time spent in, above or below the target range of 2.0 - 3.0, and INR variability, in switchers and matched non-switchers._**    
+*Median and interquartile range.*
+
+**_Fig 4. Proportion of time spent in, above or below the target range of 2.0 - 3.5, and INR variability, in switchers and matched non-switchers._**    
+*Median and interquartile range.*
+
+**_Fig 5. Proportion of time spent in, above or below the target range of 2.5 - 3.5, and INR variability, in switchers and matched non-switchers._**    
 *Median and interquartile range.*
 
 ### Effect in subgroups
@@ -257,10 +293,15 @@ Again, matching was successful: standardised mean differences in propensity scor
 patients with high INR variability (standardised mean difference (SMD) in propensity scores `r distances[target_range == "2.5-3.5" & subgroup == "volatile", dist]`),
 elderly patients (SMD `r distances[target_range == "2.5-3.5" & subgroup == "elderly", dist]`),
 and patients with mechanical heart valves (SMD `r distances[target_range == "2.5-3.5" & subgroup == "valve", dist]`).  
-The effect of a switch relative to non-switchers is summarised in Table S5 and shown in Figure 4.
+The effect of a switch relative to non-switchers is summarised in Table S5 and shown in Figs 6-8.
 
-**_Figure 4. Changes in time in therapeutic range (TTR) and international normalised ratio (INR) variability in patients who switched from acenocoumarol to phenprocoumon, relative to matched non-switchers._**  
-*Not all subgroups could be formed in all target ranges; this could cause missing values.*  
+**_Fig 6. Changes in time in the therapeutic range (TTR) of 2.0 - 3.0 and international normalised ratio (INR) variability in patients who switched from acenocoumarol to phenprocoumon, relative to matched non-switchers._**  
+*The grey area indicates the 95% confidence interval of the difference in the overall analysis.*
+
+**_Fig 7. Changes in time in the therapeutic range (TTR) of 2.0 - 3.5 and international normalised ratio (INR) variability in patients who switched from acenocoumarol to phenprocoumon, relative to matched non-switchers._**  
+*The grey area indicates the 95% confidence interval of the difference in the overall analysis.*
+
+**_Fig 8. Changes in time in the therapeutic range (TTR) of 2.5 - 3.5 and international normalised ratio (INR) variability in patients who switched from acenocoumarol to phenprocoumon, relative to matched non-switchers._**  
 *The grey area indicates the 95% confidence interval of the difference in the overall analysis.*
 
 The effect of a switch on TTR was consistent in groups with different prompts for switching (a low dose, a poor TTR or a high INR variability).
@@ -303,6 +344,11 @@ In our study, we separated the switching effect from the natural course of antic
 However, matching is sensitive to unmeasured confounders.
 We have included almost all the limited data available to anticoagulation clinics in the matching, and we believe they included the most relevant confounders.
 However, we could not control for a switch due to the start of interacting medication (e.g. rifampicin).  
+We could not assess the effect of a switch on the incidence of bleeding and thrombotic events, because we lacked the data.
+Instead, we measured TTR and INR variability.
+TTR and INR variability link the joint pharmacological effect of all vitamin K antagonists to bleeding and thrombotic complications[@Haas2016; @Veeger2005; @Bjork2016].
+Additional mechanisms leading to bleeding or thrombosis, specific to one vitamin K antagonist, are unknown and implausible.
+Therefore, TTR and INR variability are accepted proxy measures.  
 The observational nature of our study only allowed us to analyse patients who actually switched.
 Strictly speaking, our study cannot be generalised to patients whose physicians do not see an indication to switch.
 However, our results are similar to those from earlier studies comparing patients on the two drugs without switching[@Gadisseur2002a; @Fihn2003].

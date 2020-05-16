@@ -95,13 +95,19 @@ matched_data %>%
 	group_by(target_range, Key) %>%
 	spread(period_id, Print) %>%
 	arrange(target_range, i) %>%
-	select(`Target range` = target_range,
+	select( target_range,
 		   `Variable` = Key,
 		   `Short-term difference` = `short-term`,
 		   `Long-term difference` = `long-term`) %>%
-	knitr::kable("markdown",
-				 caption = "QOAC in switchers versus non-switchers (ergo positive number = switchers higher") %>%
-	write("tables/matched_overall.md")
+	split( . , .$target_range) %>%
+	iwalk(function(tab, tr) {
+		tr <- gsub(" ", "", tr)
+		tab %>%
+			ungroup() %>%
+			select(-target_range) %>%
+			knitr::kable("markdown") %>%
+			write(paste0("tables/matched-", tr, ".md"))
+	})
 
 matched_data %>%
 	filter(subgroup != "all",

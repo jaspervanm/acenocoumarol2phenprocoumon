@@ -23,8 +23,12 @@ qoac_diff[ , target_range := gsub(" ", "", target_range)]
 
 # Abstract
 
+**Background**
+Treatment with vitamin K antagonists (VKA) requires a high proportion of time in the therapeutic range (TTR) and a low international normalised ratio (INR) variability to be maximally safe and effective.
+Switching from short-acting acenocoumarol to long-acting phenprocoumon could improve VKA control.
+
 **Aims**
-We assessed whether switching from short-acting acenocoumarol to long-acting phenprocoumon could improve measures of VKA control: the time in the therapeutic range (TTR) and INR variability.
+We assessed whether switching from acenocoumarol to phenprocoumon improves the time in the therapeutic range (TTR) and INR variability.
 
 **Methods and Results**
 In a retrospective cohort with data on `r with(as.data.table(readRDS("cache/summary_followup.rds")), format(round(sum(futot)), big.mark = ","))` patients-years of VKA management from two first-line anticoagulation clinics in the Netherlands, we identified `r flow[[1, "Npat"]]` patients in target range `r flow[[1, "target_range"]]`, `r flow[[2, "Npat"]]` patients in target range `r flow[[2, "target_range"]]` and `r flow[[3, "Npat"]]` patients in target range `r flow[[3, "target_range"]]`  who switched from acenocoumarol to phenprocoumon.

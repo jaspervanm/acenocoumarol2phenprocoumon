@@ -60,14 +60,19 @@ qoac %>%
 	}) %>%
 	arrange(target_range, i) %>%
 	select(
-		`Target range` = target_range,
+		target_range,
 		`Parameter` = key,
 		`Before switch` = acenocoumarol,
 		`Short-term` = `short-term`,
 		`Long-term` = `long-term`
 	) %>%
-	knitr::kable("markdown") %>%
-	write("tables/switchers_qoac.md")
+	split( . , .$target_range) %>%
+	iwalk(function(tab, tr) {
+		tab %>%
+			select(-target_range) %>%
+			knitr::kable("markdown") %>%
+			write(paste0("tables/switchers_qoac-", gsub(" ", "", tr), ".md"))
+	})
 
 qoac %>%
 	filter(subgroup != "all", key %in% c("dose", "doseratio", "tbi")) %>%

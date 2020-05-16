@@ -623,13 +623,6 @@
       "Repository": "CRAN",
       "Hash": "61e4a10781dd00d7d81dd06ca9b94e95"
     },
-    "metafor": {
-      "Package": "metafor",
-      "Version": "2.1-0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "5e3a2a8c06c249cf36fdd95c81610c04"
-    },
     "mgcv": {
       "Package": "mgcv",
       "Version": "1.8-28",
@@ -706,6 +699,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "838059285d1cfe9bd6212a11e2ef7cfe"
+    },
+    "patchwork": {
+      "Package": "patchwork",
+      "Version": "1.0.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "16eee5b5edc41eec5af1149ccdc6b2c9"
     },
     "pillar": {
       "Package": "pillar",

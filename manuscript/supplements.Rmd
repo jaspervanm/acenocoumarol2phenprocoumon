@@ -1,0 +1,46 @@
+# Patient characteristics of potential controls
+
+```{r child = "../tables/patchar_all_controls.md"}
+```
+
+Table S1. Patient characteristics from all potential controls.
+
+# Dosing and monitoring in subgroups of switchers
+
+```{r child = "../tables/switchers_qoac_subgroups.md"}
+```
+
+Table S2. Direct effect of switching in subgroups.  
+See also table S6.
+
+# The matching process
+##  Propensity scores
+
+```{r child = "../tables/propensity_score_models.md"}
+```
+
+Table S3. Coefficients from logistic regression used in the propensity score matching.
+
+## Patient characteristics of matched sets
+
+```{r child = "../tables/patchar_matched.md"}
+```
+
+Table S4. Patient characteristics from switchers and selected non-switchers.
+
+# Subgroups
+## Patient characteristics
+
+```{r child = "../tables/patchar_subgroups.md"}
+```
+
+Table S5. Patient characteristics from switchers and selected non-switchers in subgroups.
+
+## Effect of switching in subgroups
+
+```{r child = "../tables/matched_subgroups.md"}
+```
+
+Table S6. Effect of switching from acenocoumarol to phenprocoumon, compared with non-switchers.  
+Estimate with 95% confidence interval.  
+An asterisk indicates that values were log-transformed in the analyses.

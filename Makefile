@@ -73,20 +73,22 @@ cache/matched_qoac.rds: $(MATCHED_TR)
 plots/flowchart.% cache/flow_%.rds: flowchart.R cache/eligibility_qoac.rds cache/matched_qoac.rds
 	Rscript $<
 
-cache/qoac_over_time.rds: plot_qoac_matches.R data/INR_data.rds cache/matched_qoac.rds
-	Rscript $< calc
+cache/qoac_over_time.rds: calc_matched_qoac_over_time.R data/INR_data.rds cache/matched_qoac.rds
+	Rscript $<
 
 tables/matching_performance.txt plots/matching_performance.pdf cache/balance_distance.rds: check_matching_performance.R $(MATCHED_TR)
 	Rscript $<
 
-tables/matched_overall.md \
+$(patsubst %, tables/matched-%.md, $(TRs)) \
 cache/matched_ard_good.rds \
 tables/matched_subgroups.md: cache/matched_analyses.rds
 cache/matched_analyses.rds: analyse_qoac_matches.R cache/matched_qoac.rds
 	Rscript $<
+matched_tables: $(patsubst %, tables/matched-%.md, $(TRs))
 
-cache/matched_heterogeneity.rds plots/subgroup_forest.%: analyse_heterogeneity_subgroups.R cache/matched_analyses.rds
+plots/subgroup_forest%: analyse_heterogeneity_subgroups.R cache/matched_analyses.rds
 	Rscript $<
+subgroup_plots: $(patsubst %,plots/subgroup_forest-%.png,$(TRs)) $(patsubst %,plots/subgroup_forest-%.eps,$(TRs))
 
 tables/propensity_score_models.md: propensity_estimates.R $(MATCHED_TR)
 	Rscript $<
@@ -94,11 +96,13 @@ tables/propensity_score_models.md: propensity_estimates.R $(MATCHED_TR)
 plots/correlation_heatmap.pdf: propensity_colinearity.R $(MATCHED_TR)
 	Rscript $<
 
-plots/matched_development_%.png plots/matched_development_%.eps: plot_qoac_matches.R cache/qoac_over_time.rds data/subgroups.rds
-	Rscript $< plot
+plots/qoac_over_time-%.png plots/qoac_over_time-%.eps: plot_matched_qoac_over_time.R cache/qoac_over_time.rds data/subgroups.rds
+	Rscript $< $*
+qoac_over_time_plots : $(patsubst %,plots/qoac_over_time-%.png,$(TRs)) $(patsubst %,plots/qoac_over_time-%.eps,$(TRs))
 
-tables/switchers_qoac.md tables/switchers_qoac_subgroups.md cache/dose_switchers_summary.rds cache/switchers_correlations.rds: analyse_switchers.R qoac.rds data/subgroups.rds
+$(patsubst %, tables/switchers_qoac-%.md, $(TRs)) tables/switchers_qoac_subgroups.md cache/dose_switchers_summary.rds cache/switchers_correlations.rds: analyse_switchers.R qoac.rds data/subgroups.rds
 	Rscript $<
+switchers_tables: $(patsubst %, tables/switchers_qoac-%.md, $(TRs))
 
 plots/vgr_switchers.png: graph_vgr_switchers.R qoac.rds
 	Rscript $<
@@ -120,13 +124,13 @@ manuscript/bibliography.bib: ../../articles/bib/variability_phenprocoumon.bib
 
 manuscript_dependencies = manuscript/bibliography.bib \
 	manuscript/settings.md \
-	tables/switchers_qoac.md \
+	$(switchers_tables) \
 	tables/patchar_cases.md \
-	tables/matched_overall.md \
+	$(matched_tables) \
 	plots/periods.png \
 	plots/flowchart.png \
-	plots/matched_development_all.png \
-	plots/subgroup_forest.png \
+	$(qoac_over_time_plots) \
+	$(subgroup_plots) \
 	cache/switchers_correlations.rds \
 	cache/dose_switchers_summary.rds \
 	cache/summary_followup.rds \
@@ -160,17 +164,30 @@ manuscript/abstract.md: abstract.Rmd \
 manuscript/abstract.docx: manuscript/abstract.md
 	pandoc manuscript/settings.md $< -o $@
 
+manuscript/supporting_information.md: $(wildcard manuscript/caption_S*)
+	echo "# Supporting Information" > $@ ; \
+	for x in $^ ; do \
+		printf "\n" >> $@ ; cat $$x >> $@ ; \
+	done
+
 #---- End manuscript generation ----
 #---- Generate files for submission ----
 submission: submission/manuscript.docx \
+	submission/IRB_statement.pdf \
 	submission/abstract.docx \
+	submission/cover_letter.docx \
+	submission/reviewer_comments.docx \
 	$(patsubst %,submission/S%_Table.docx, 1 2 3 4 5 6) \
-	$(patsubst %,submission/Fig_%.eps, 1 2 3 4)
+	$(patsubst %,submission/Fig%.eps, 1 2 3 4 5 6 7 8)
 
-submission/Fig_1.eps: plots/periods.eps
-submission/Fig_2.eps: plots/flowchart.eps
-submission/Fig_3.eps: plots/matched_development_all.eps
-submission/Fig_4.eps: plots/subgroup_forest.eps
+submission/Fig1.eps: plots/periods.eps
+submission/Fig2.eps: plots/flowchart.eps
+submission/Fig3.eps: plots/qoac_over_time-2-3.eps
+submission/Fig4.eps: plots/qoac_over_time-2-3.5.eps
+submission/Fig5.eps: plots/qoac_over_time-2.5-3.5.eps
+submission/Fig6.eps: plots/subgroup_forest-2-3.eps
+submission/Fig7.eps: plots/subgroup_forest-2-3.5.eps
+submission/Fig8.eps: plots/subgroup_forest-2.5-3.5.eps
 
 submission/%.eps:
 	cp -f $< $@
@@ -203,10 +220,20 @@ submission/manuscript.docx: manuscript/manuscript.md \
 	manuscript/abstract.md \
 	manuscript/keywords.md \
 	manuscript/manuscript.md \
+	manuscript/supporting_information.md \
 	-o $@ --filter=pandoc-citeproc \
 	--reference-doc=manuscript/general_reference.docx
 
 submission/supplements.docx: manuscript/supplements.docx
+	cp -f $< $@
+
+submission/cover_letter.docx: manuscript/cover_letter.md
+	pandoc $< -o $@
+
+submission/reviewer_comments.docx: manuscript/reviewer_comments.md
+	pandoc $< -o $@
+
+submission/IRB_statement.pdf: manuscript/IRB_statement.pdf
 	cp -f $< $@
 #---- End submission generation ----
 
