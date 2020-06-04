@@ -35,7 +35,7 @@ calc_qoac <- function(pid) {
 	
 	act_inr_stats <- act_inrs[periods, .(period_id, INR_date = x.INR_date, INR = x.INR),
 							  on = list(INR_date >= from, INR_date <= to), allow.cartesian = TRUE][
-							  	, .(vgr = mean(diff(INR)^2 / as.numeric(diff(INR_date)) ),
+							  	, .(vgr = sqrt(mean(diff(INR)^2 / as.numeric(diff(INR_date)) )),
 							  		mean_inr = mean(INR),
 							  		nINR = length(INR),
 							  		timespan = max(INR_date) - min(INR_date)

@@ -21,7 +21,7 @@ calc_qoac <- function(Data) {
 		INR_date <- Data[INR_date <= i, .(max(INR_date))][[1]]
 		int_inrs <- all_interpolated_inrs[between(x, INR_date - 180, INR_date), y]
 		
-		vgr <- Data[between(INR_date, i - 180, i), mean(diff(INR)^2 / as.numeric(diff(INR_date)))]
+		vgr <- Data[between(INR_date, i - 180, i), sqrt( mean(diff(INR)^2 / as.numeric(diff(INR_date))) )]
 		
 		tibble(
 			cf_time     = i,
